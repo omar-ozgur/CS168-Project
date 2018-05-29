@@ -4,7 +4,11 @@ import sys
 import pydicom
 import numpy as np
 
-OUT_DIR = os.getcwd() + "/PNGS"
+IN_DIR = os.getcwd() + "/data"
+PNG_IN_DIR = IN_DIR + "/inputs"
+PNG_OUT_DIR = IN_DIR + "/outputs"
+INPUT = "Features"
+OUTPUT = "Labels"
 
 def convert(mri_path, mri_filename):
     """ Function to convert a DICOM MRI file to PNG
@@ -22,38 +26,57 @@ def convert(mri_path, mri_filename):
     shape = ds.pixel_array.shape
     # Convert to float to avoid overflow or underflow losses.
     image_2d = ds.pixel_array.astype(float)
-    # Rescaling grey scale between 0-255
-    image_2d_scaled = (np.maximum(image_2d,0) / image_2d.max()) * 255.0
+    # Rescaling grey scale 
+    normalize_factor = 1000.0
+    for row in range(len(image_2d)):
+        for col in range(len(image_2d[0])):
+            image_2d[row][col] = (image_2d[row][col] / normalize_factor) * 255.0
+            
     # Convert to uint8 
-    image_2d_scaled = np.uint8(image_2d_scaled)
+    image_2d_scaled = np.uint8(image_2d)
 
+    if INPUT in mri_filename:
+        new_filename = mri_filename.replace(INPUT+'_', '')
+        png_fn = os.path.join(PNG_IN_DIR, new_filename + '.png')
+    elif OUTPUT in mri_filename:
+        new_filename = mri_filename.replace(OUTPUT+'_', '')
+        png_fn = os.path.join(PNG_OUT_DIR, new_filename + '.png')
+        
+    print('Writing {}...'.format(png_fn))
     # Create PNG file
-    png_file = open(os.path.join(OUT_DIR, mri_filename+".png"), "wb")
+    png_file = open(png_fn, "wb")
     # Write to png file
     w = png.Writer(shape[1], shape[0], greyscale=True)
     w.write(png_file, image_2d_scaled)
     png_file.close()
 
+def getFiles(root_dir, files):
+    for r, s, f in os.walk(root_dir):
+        if f == []:
+            for sn in s:
+                curr_path = os.path.join(r, sn)
+                getFiles(curr_path, files)
+        else:
+            for fn in f:
+                if os.path.splitext(fn)[1] == '.dcm':
+                    curr_path = os.path.join(r, fn)
+                    dirs = r.split('/')
+                    pre = dirs[-2] + '_' + dirs[-1] + '_'
+                    files.add((curr_path, pre + fn[:-4]))
+
 
 def main():
-    # Must provide dicom directory
-    if len(sys.argv) < 2:
-        print("Please provide an absolute path for the dicom images.")
-        sys.exit()
-    # Get directory with dicom files from user
-    in_dir = sys.argv[1]
     # Create png directory
-    if not os.path.exists(OUT_DIR):
-        os.makedirs(OUT_DIR)
-    files = []
-    # Get all files in dicom directory
-    for f in os.listdir(in_dir):
-        full_path = os.path.join(in_dir, f)
-        if os.path.isfile(full_path):
-            files.append((full_path, f[:-4]))
-    # Convert all dicom files to png
-    for path, name in files:
-        convert(path, name)
+    if not os.path.exists(PNG_IN_DIR):
+        os.makedirs(PNG_IN_DIR)
+    if not os.path.exists(PNG_OUT_DIR):
+        os.makedirs(PNG_OUT_DIR)
+    files = set()
+    # Get all files recursively in dicom directory
+    getFiles(IN_DIR, files)
+    # Convert all dicom files to pngs
+    for f, fn in files:
+        convert(f, fn)
 
 if __name__ == '__main__':
     main()
