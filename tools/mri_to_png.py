@@ -27,7 +27,9 @@ def convert(mri_path, mri_filename):
     # Convert to float to avoid overflow or underflow losses.
     image_2d = ds.pixel_array.astype(float)
     # Rescaling grey scale 
-    normalize_factor = 1000.0
+    normalize_factor = 2000.0 if INPUT not in mri_filename else image_2d.max()
+    if INPUT not in mri_filename:
+        image_2d[image_2d==5000.0] = normalize_factor
     for row in range(len(image_2d)):
         for col in range(len(image_2d[0])):
             image_2d[row][col] = (image_2d[row][col] / normalize_factor) * 255.0
