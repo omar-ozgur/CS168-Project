@@ -13,7 +13,7 @@ from sklearn.cluster import KMeans
 from skimage.transform import resize
 
 data_path = "../data"
-output_path = "../output/thresholding/"
+output_path = "../output/thresholding/medium/"
 
 # Get individual slices from a dicom image
 def get_slices(path):
@@ -79,22 +79,40 @@ def create_lesion_mask(image):
     centers = sorted(kmeans.cluster_centers_.flatten())
     threshold = centers[3]
 
-    # Use inertia to determine how close pixels are to their cluster centers
-    inertia = kmeans.inertia_
-    if inertia > 750:
-        original = exposure.rescale_intensity(original, out_range=(0.0, 1.0)) * 0.3
-        original[0][0] = 1.0
-        return original
-
     # Use the threshold to filter possible lesions
-    thresh_img = np.where(image > threshold, 1.0, 0.3)
+    max_value, min_value = 1.0, 0.3
+    thresh_img = np.where(image > threshold, max_value, min_value)
 
     # Erode and then dilate regions to remove small anomalies
     eroded = morphology.erosion(thresh_img, np.ones([10, 10]))
     dilation = morphology.dilation(eroded, np.ones([10, 10]))
 
+    # Return the original image if pixels are too far from cluster centers or all intensity values are less than the threshold
+    inertia = kmeans.inertia_
+    if inertia > 650 or np.max(dilation) < max_value:
+        original = exposure.rescale_intensity(original, out_range=(0.0, 1.0)) * 0.3
+        original[0][0] = 1.0
+        return original
+
     # Apply the dilated regions to the original image
     return dilation * original
+
+# Resize the image (source: https://www.raddq.com/dicom-processing-segmentation-visualization-in-python/)
+def resize(images, slices, new_spacing=[1,1,1]):
+    
+    # Determine current pixel spacing
+    spacing = map(float, ([slices[0].SliceThickness] + slices[0].PixelSpacing))
+    spacing = np.array(list(spacing))
+
+    # Resize the images
+    resize_factor = spacing / new_spacing
+    new_real_shape = images.shape * resize_factor
+    new_shape = np.round(new_real_shape)
+    real_resize_factor = new_shape / images.shape
+    new_spacing = spacing / real_resize_factor
+    images = scipy.ndimage.interpolation.zoom(images, real_resize_factor)
+    
+    return images
 
 # Load dicom image data
 def load_data(folder, save_path, roi=False):
@@ -102,6 +120,7 @@ def load_data(folder, save_path, roi=False):
     # Get dicom image data
     original_slices = get_slices(folder + "/Features")
     original_images = get_pixels(original_slices)
+    original_images = resize(original_images, original_slices)
 
     # Plot original images
     rows, cols = 4, 6
@@ -112,6 +131,7 @@ def load_data(folder, save_path, roi=False):
         # Get dicom image data
         roi_slices = get_slices(folder + "/Labels")
         roi_images = get_pixels(roi_slices)
+        roi_images = resize(roi_images, roi_slices)
 
         # Plot roi images
         rows, cols = 4, 6
