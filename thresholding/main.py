@@ -12,10 +12,8 @@ from skimage import morphology
 from sklearn.cluster import KMeans
 from skimage.transform import resize
 
-data_path = "./data/FLAIR/1"
-output_path = "./output/"
-images_name = "images.npy"
-images_path = output_path + images_name
+data_path = "../data"
+output_path = "../output/thresholding/"
 
 # Get individual slices from a dicom image
 def get_slices(path):
@@ -29,7 +27,7 @@ def get_pixels(slices):
     return np.array(images)
 
 # Plot dicom images as a grid
-def plot_images(slices, rows=4, cols=6, start=0, freq=1):
+def plot_images(slices, folder, name, rows=4, cols=6, start=0, freq=1):
 
     # Initialize the plot
     figure, grid = plt.subplots(rows, cols, figsize=[cols * 2, rows * 2])
@@ -55,7 +53,7 @@ def plot_images(slices, rows=4, cols=6, start=0, freq=1):
         item.axis("off")
 
     # Display the plot
-    plt.show()
+    plt.savefig("{}/{}.jpg".format(folder, name))
 
 # Create a lesion mask based on image processing techniques
 def create_lesion_mask(image):
@@ -99,24 +97,31 @@ def create_lesion_mask(image):
     return dilation * original
 
 # Load dicom image data
-def load_data(saved=False, resize=False):
-    if saved and images_name not in os.listdir(output_path):
-        return np.load(images_path)
+def load_data(folder, save_path, roi=False):
 
     # Get dicom image data
-    slices = get_slices(data_path)
-    images = get_pixels(slices)
+    original_slices = get_slices(folder + "/Features")
+    original_images = get_pixels(original_slices)
 
-    # Save the processed images for future use
-    np.save(images_path, images)
+    # Plot original images
+    rows, cols = 4, 6
+    freq = max(1, int(len(original_images) / (rows * cols)))
+    plot_images(original_images, save_path, "Original", rows=rows, cols=cols, freq=freq)
 
-    return images
+    if roi:
+        # Get dicom image data
+        roi_slices = get_slices(folder + "/Labels")
+        roi_images = get_pixels(roi_slices)
+
+        # Plot roi images
+        rows, cols = 4, 6
+        freq = max(1, int(len(roi_images) / (rows * cols)))
+        plot_images(roi_images, save_path, "ROI", rows=rows, cols=cols, freq=freq)
+
+    return original_images
 
 # Plot a set of dicom images
-def plot(masked=False):
-
-    # Load the saved image
-    images = np.load(images_path)
+def plot(images, save_path, masked=False):    
 
     # Create the lesion mask
     if masked:
@@ -128,10 +133,26 @@ def plot(masked=False):
     # Plot the results
     rows, cols = 4, 6
     freq = max(1, int(len(images) / (rows * cols)))
-    plot_images(images, rows=rows, cols=cols, freq=freq)
+    plot_images(images, save_path, "Segmented", rows=rows, cols=cols, freq=freq)
 
-# Load image data
-load_data()
+# Process a folder, containing features and labels in dicom format
+def process_folder(path):
+    for folder in glob(path + "/*"):
 
-# Plot the images with lesion masks
-plot(masked=True)
+        # Get the save path
+        _, folder_name = os.path.split(folder)
+        save_path = output_path + folder_name
+
+        # Create the output directory if it doesn't exist
+        if not os.path.isdir(save_path):
+            os.makedirs(save_path)
+
+        # Load image data
+        print("Processing data at directory {}".format(folder))
+        images = load_data(folder, save_path, roi=True)
+
+        # Plot the images with lesion masks
+        plot(images, save_path, masked=True)
+
+# Process data
+process_folder(data_path)
