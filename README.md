@@ -62,6 +62,14 @@ git clone git@github.com:omar-ozgur/CS168-Project.git
 
 ### Machine Learning
 
+#### Pre-requisites
+
+* Tensorflow 1.4.1 or above
+
+#### Recommended
+
+* Tensorflow GPU + cuDNN
+
 The pix2pix pipeline is custom built with the help of the scripts in the `tools` directory. The originals are read from the `data/*/Features` directory and the targets are read from the `data/*/Labels` directory. The pipeline runs as follows:
 1. Clean all prior data from `output/pix2pix/`. This can be run via `make clean`
 2. Recursively convert dicom images from `data` folder to _pngs_ into `output/pix2pix/inputs` and `output/pix2pix/outputs`. This can be run via `make convert`
@@ -79,6 +87,8 @@ make run
 ## Results
 
 When reviewing the results of the segmentation, we chose to focus on metrics of **sensitivity** and **specificity** to denote how well our models could detect brain lesions in the presence of actual brain lesions, and how well it could ignore false segmentation when no brain lesion existed.
+
+The pix2pix library was trained on 480 MRI slices from 23 patients, and tested against 118 MRI slices from the same patients. It was run with Tensorflow GPU on a NVIDIA GTX 1070 with an average training time of 223 minutes.
 
 We found that the pix2pix model was most successful at accurately segmenting the brain lesions primarily due to the fact that the generator and discriminator within the pix2pix cGAN trained on a varied data set. More details of the results and their significance can be found in our [report](https://docs.google.com/document/d/1RftqDMoXXs4qWlg8siRhz6chSB2Nw78hr0g1FRWQ9Zw/edit?usp=sharing).
 
