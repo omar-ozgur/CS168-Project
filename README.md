@@ -10,6 +10,8 @@ We chose to focus on leveraging two key techniques in automatic brain lesion seg
 
 While we initially intended on running our models on T1w, T2w and FLAIR MRIs, we chose to focus only on FLAIR MRIs due to our limited dataset that was procured from the Neuroscience department at the University of California, Los Angeles. Before beginning the project, we reviewed some of the state of the art methods for brain lesion segmentation which can be found [here](https://drive.google.com/file/d/16AWvtvrqFEP6ZTUXRjxh-rrSpnvnF8ie/view?usp=sharing).
 
+![Screenshot](images/comparison.png)
+
 ## Directory Structure
 ```
 .
