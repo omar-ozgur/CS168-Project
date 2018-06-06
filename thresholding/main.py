@@ -10,7 +10,7 @@ from skimage import exposure
 from skimage import measure
 from skimage import morphology
 from sklearn.cluster import KMeans
-from skimage.transform import resize
+from skimage import transform
 
 data_path = "../data"
 output_path = "../output/thresholding/medium/"
@@ -84,12 +84,12 @@ def create_lesion_mask(image):
     thresh_img = np.where(image > threshold, max_value, min_value)
 
     # Erode and then dilate regions to remove small anomalies
-    eroded = morphology.erosion(thresh_img, np.ones([10, 10]))
-    dilation = morphology.dilation(eroded, np.ones([10, 10]))
+    eroded = morphology.erosion(thresh_img, np.ones([8, 8]))
+    dilation = morphology.dilation(eroded, np.ones([8, 8]))
 
     # Return the original image if pixels are too far from cluster centers or all intensity values are less than the threshold
     inertia = kmeans.inertia_
-    if inertia > 650 or np.max(dilation) < max_value:
+    if inertia > 750 or np.max(dilation) < max_value:
         original = exposure.rescale_intensity(original, out_range=(0.0, 1.0)) * 0.3
         original[0][0] = 1.0
         return original
@@ -97,22 +97,23 @@ def create_lesion_mask(image):
     # Apply the dilated regions to the original image
     return dilation * original
 
-# Resize the image (source: https://www.raddq.com/dicom-processing-segmentation-visualization-in-python/)
-def resize(images, slices, new_spacing=[1,1,1]):
-    
-    # Determine current pixel spacing
-    spacing = map(float, ([slices[0].SliceThickness] + slices[0].PixelSpacing))
-    spacing = np.array(list(spacing))
+# Resize the image
+def resize(images, size):
+
+    resized_images = []
 
     # Resize the images
-    resize_factor = spacing / new_spacing
-    new_real_shape = images.shape * resize_factor
-    new_shape = np.round(new_real_shape)
-    real_resize_factor = new_shape / images.shape
-    new_spacing = spacing / real_resize_factor
-    images = scipy.ndimage.interpolation.zoom(images, real_resize_factor)
+    for i in range(len(images)):
+        image = images[i]
+        size_x = float(len(image))
+        size_y = float(len(image[0]))
+        new_size_x = size
+        new_size_y = (size_y / size_x) * new_size_x
+        new_size = (int(new_size_x), int(new_size_y))
+        new_image = transform.resize(image, new_size)
+        resized_images.append(new_image)
     
-    return images
+    return resized_images
 
 # Load dicom image data
 def load_data(folder, save_path, roi=False):
@@ -120,7 +121,7 @@ def load_data(folder, save_path, roi=False):
     # Get dicom image data
     original_slices = get_slices(folder + "/Features")
     original_images = get_pixels(original_slices)
-    original_images = resize(original_images, original_slices)
+    original_images = resize(original_images, 250)
 
     # Plot original images
     rows, cols = 4, 6
@@ -131,7 +132,7 @@ def load_data(folder, save_path, roi=False):
         # Get dicom image data
         roi_slices = get_slices(folder + "/Labels")
         roi_images = get_pixels(roi_slices)
-        roi_images = resize(roi_images, roi_slices)
+        roi_images = resize(roi_images, 250)
 
         # Plot roi images
         rows, cols = 4, 6
