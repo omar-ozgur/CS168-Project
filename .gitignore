@@ -112,3 +112,4 @@ output/pix2pix/out_resize/
 output/pix2pix/outputs/
 output/pix2pix/inputs/
 output/pix2pix/in_resize/
+output/pix2pix/lesions_train/
