@@ -60,6 +60,14 @@ git clone git@github.com:omar-ozgur/CS168-Project.git
 
 ### Image Processing
 
+Run `cd thresholding` to move to the thresholding directory.
+
+To setup thresholding dependencies, run `make setup`.
+
+To run the thresholding algorithm, run `make run`.
+
+This process will run on data in the root "data/thresholding" directory, and output results to the root "output/thresholding" directory.
+
 ### Machine Learning
 
 #### Pre-requisites
@@ -97,3 +105,5 @@ We found that the pix2pix model was most successful at accurately segmenting the
 The pix2pix library is based on a very influential [paper](https://arxiv.org/pdf/1611.07004v1.pdf) of Image to Image translation by Phillip Isola et al.
 
 We used the Tensorflow implementation as created by [affinelayer](https://github.com/affinelayer/), utilizing only the necessary components within our own pipeline. [Source](https://github.com/affinelayer/pix2pix-tensorflow)
+
+The image processing approach that utilizes thresholding was inspired by a similar approach documented by Howard Chen. [Source](https://www.raddq.com/dicom-processing-segmentation-visualization-in-python/)
