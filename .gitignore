@@ -106,3 +106,9 @@ venv.bak/
 # MAC
 .DS_Store
 
+# Ignore large image files for pix2pix
+output/pix2pix/combined/
+output/pix2pix/out_resize/
+output/pix2pix/outputs/
+output/pix2pix/inputs/
+output/pix2pix/in_resize/
