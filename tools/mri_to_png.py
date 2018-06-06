@@ -4,9 +4,10 @@ import sys
 import pydicom
 import numpy as np
 
-IN_DIR = os.getcwd() + "/data"
-PNG_IN_DIR = IN_DIR + "/inputs"
-PNG_OUT_DIR = IN_DIR + "/outputs"
+ROOT_DIR = os.getcwd()
+IN_DIR = ROOT_DIR + "/data"
+PNG_IN_DIR = ROOT_DIR + "output/pix2pix/inputs"
+PNG_OUT_DIR = ROOT_DIR + "output/pix2pix/outputs"
 INPUT = "Features"
 OUTPUT = "Labels"
 
