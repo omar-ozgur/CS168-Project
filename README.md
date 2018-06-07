@@ -16,19 +16,19 @@ While we initially intended on running our models on T1w, T2w and FLAIR MRIs, we
 ```
 .
 ├── data
-|   ├── 0
+|   ├── 1
 |   |   ├── Features
 |   |   |   ├── *.dcm
 |   |   ├── Labels
 |   |   |   ├── *.dcm
-|   ├── 1
+|   ├── 2
 |   ...
 |   └── 23
 ├── output
 |   ├── pix2pix/lesions_test
 |   ├── thresholding
 |   |   ├── high
-|   |   |   ├── 0
+|   |   |   ├── 1
 |   |   |   |   ├── Original.jpg
 |   |   |   |   ├── ROI.jpg
 |   |   |   |   ├── Segmented.jpg
@@ -103,6 +103,10 @@ When reviewing the results of the segmentation, we chose to focus on metrics of 
 The pix2pix library was trained on 480 MRI slices from 23 patients, and tested against 118 MRI slices from the same patients. It was run with Tensorflow GPU on a NVIDIA GTX 1070 with an average training time of 223 minutes.
 
 We found that the pix2pix model was most successful at accurately segmenting the brain lesions primarily due to the fact that the generator and discriminator within the pix2pix cGAN trained on a varied data set. More details of the results and their significance can be found in our [report](https://docs.google.com/document/d/1RftqDMoXXs4qWlg8siRhz6chSB2Nw78hr0g1FRWQ9Zw/edit?usp=sharing).
+
+## Troubleshooting
+
+Note that due to a large dataset, the data folder _might not be present_. In this case, you can download our dataset from [this link](https://drive.google.com/file/d/1GwU1cTqgz_Tw-MLOeuwevG2DPiAjQNOE/view) and unzip it manually into a `data` folder, or you can do this conveniently with `make download` while in the root directory. This will automatically download the data, unzip into `data` and remove the zip file.
 
 ## Credit
 
