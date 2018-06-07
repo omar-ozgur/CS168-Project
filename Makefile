@@ -9,11 +9,13 @@ TRAIN=lesions_train
 TEST=lesions_test
 ROOT=output/pix2pix
 ZIP=data.zip
+DATA=data
 # Downloads data from Gdrive -- ONLY RUN IF DATA NOT ALREADY THERE
 download:
 	curl -s -L https://drive.google.com/uc\?export\=download\&id\=1GwU1cTqgz_Tw-MLOeuwevG2DPiAjQNOE > $(ZIP)
-	unzip $(ZIP) -d data
+	unzip $(ZIP) -d $(DATA)
 	rm $(ZIP)
+	rm -rf $(DATA)/__MACOSX
 # Installs any required dependencies
 setup:
 	pip3 install -r requirements.txt
