@@ -39,6 +39,9 @@ While we initially intended on running our models on T1w, T2w and FLAIR MRIs, we
 ├── thresholding
 |   ├── main.py
 |   └── requirements.txt
+├── images
+|   ├── comparison.png
+|   └── thresholding.png
 ├── tools
 |   ├── mri_to_png.py
 |   ├── process.py
@@ -62,11 +65,9 @@ git clone git@github.com:omar-ozgur/CS168-Project.git
 
 ### Image Processing
 
-Run `cd thresholding` to move to the thresholding directory.
-
-To setup thresholding dependencies, run `make setup`.
-
-To run the thresholding algorithm, run `make run`.
+1. Run `cd thresholding` to move to the thresholding directory.
+2. To setup thresholding dependencies, run `make setup`.
+3. To run the thresholding algorithm, run `make run`.
 
 This process will run on data in the root "data/thresholding" directory, and output results to the root "output/thresholding" directory.
 
@@ -81,18 +82,19 @@ This process will run on data in the root "data/thresholding" directory, and out
 * Tensorflow GPU + cuDNN
 
 The pix2pix pipeline is custom built with the help of the scripts in the `tools` directory. The originals are read from the `data/*/Features` directory and the targets are read from the `data/*/Labels` directory. The pipeline runs as follows:
-1. Clean all prior data from `output/pix2pix/`. This can be run via `make clean`
-2. Recursively convert dicom images from `data` folder to _pngs_ into `output/pix2pix/inputs` and `output/pix2pix/outputs`. This can be run via `make convert`
-3. Resize all pngs to 256x256 images into `output/pix2pix/in_resize` and `output/pix2pix/out_resize`. This can be run via `make resize`
-4. Combine the inputs and desired outputs into a single side by side png for pix2pix in the `output/pix2pix/combined` directory. This can be run via `make combine`
-5. Segregate the combined data into _training_ and _testing_ sets in `output/pix2pix/combined/train` and `output/pix2pix/combined/val` respectively. This can be run via `make split`
+1. Get all required dependencies for running the pix2pix pipeline. This can be run via `make setup`
+2. Clean all prior data from `output/pix2pix/`. This can be run via `make clean`
+3. Recursively convert dicom images from `data` folder to _pngs_ into `output/pix2pix/inputs` and `output/pix2pix/outputs`. This can be run via `make convert`
+4. Resize all pngs to 256x256 images into `output/pix2pix/in_resize` and `output/pix2pix/out_resize`. This can be run via `make resize`
+5. Combine the inputs and desired outputs into a single side by side png for pix2pix in the `output/pix2pix/combined` directory. This can be run via `make combine`
+6. Segregate the combined data into _training_ and _testing_ sets in `output/pix2pix/combined/train` and `output/pix2pix/combined/val` respectively. This can be run via `make split`
 
 **Note that all of this can be completed by running the following cmake command:**
 ```bash
 make run
 ```
-6. Train the model by running `make train` which will store training data into `output/pix2pix/lesions_train`
-7. Test the model on validation data by running `make test` which will create a HTML file of comparison in `output/pix2pix/lesions_test`
+7. Train the model by running `make train` which will store training data into `output/pix2pix/lesions_train`
+8. Test the model on validation data by running `make test` which will create a HTML file of comparison in `output/pix2pix/lesions_test`
 
 ## Results
 
