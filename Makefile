@@ -8,6 +8,12 @@ EPOCHS=300
 TRAIN=lesions_train
 TEST=lesions_test
 ROOT=output/pix2pix
+ZIP=data.zip
+# Downloads data from Gdrive -- ONLY RUN IF DATA NOT ALREADY THERE
+download:
+	curl -s -L https://drive.google.com/uc\?export\=download\&id\=1GwU1cTqgz_Tw-MLOeuwevG2DPiAjQNOE > $(ZIP)
+	unzip $(ZIP) -d data
+	rm $(ZIP)
 # Installs any required dependencies
 setup:
 	pip3 install -r requirements.txt
